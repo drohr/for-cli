@@ -55,9 +55,15 @@ def main():
                 host = options.host
                 url = "%s/hosts/%s/facts" % (baseurl, host)
                 print("listing facts for %s\n" % (host))
+        if function == 'os':
+            url = "%s/operatingsystems" % (baseurl)
+            print ("listing operatingsystems")
         if function == 'status':
             url = "%s/%s" % (baseurl, function)
             print("getting status")
+        if function == 'dashboard':
+            url = "%s/%s" % (baseurl, function)
+            print("getting dashboard")
     else:
         sys.exit(0)
    
