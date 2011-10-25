@@ -8,24 +8,32 @@ Make sure to change the default username/password and baseurl for your foreman i
 
 #### Get all hosts and values for a specific fact (kernelversion)
 
-    for-cli -f facts kernelversion
+    for-cli -q facts kernelversion
 
 #### Get all facts and values for a specific host (FQDN)
 
-    for-cli -f facts --host=host.example.com
+    for-cli -q facts --host=host.example.com
 
 ### Query for status
 
 #### System status (result ok/failed, database lag in miliseconds)
 
-    for-cli -f status
+    for-cli -q status
 
 #### Summary statistcs (total hosts, active hosts, hosts in error etc)
 
-    for-cli -f dashboard
+    for-cli -q dashboard
 
-### Query for operatingsystems
+### Get full lists
 
 #### Retrieve a list of Operatingsystems
 
-    for-cli -f os
+    for-cli -q os
+
+#### Retrieve a list of Hosts
+
+    for-cli -q hosts
+
+#### Retrieve a list of Hostsgroups
+
+    for-cli -q hostgroups

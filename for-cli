@@ -2,7 +2,7 @@
 # foreman cli <david@rohr.se>
 
 import urllib2, base64, json, sys
-from optparse import OptionParser
+import optparse
 
 def main():
 
@@ -12,25 +12,28 @@ def main():
     baseurl = 'http://foreman.example.com'
 
     # if no input, show some love
-    usage = "usage: %prog [options] arg"
+    usage = "usage: %prog -q arg [query options]"
     if len(sys.argv) < 2:
         sys.stderr.write('Usage: for-cli -h\n')
         sys.exit(1)
 
     # optparse values
-    parser = OptionParser(usage="%prog [option] arg", version="%prog 0.5")
-    parser.add_option("-f",
-        metavar="FUNCTION", dest="function", 
+    parser = optparse.OptionParser(usage="%prog -q arg [query options]", version="%prog 0.6")
+    parser.add_option("-q",
+        metavar="QUERY", dest="query", 
         default=False, action="store", 
-        help="Dump info for Function")
-    parser.add_option("--host",
-        metavar="HOST", dest="host", 
-        default=False, action="store", 
-        help="Dump info for HOST")
+        help="Query REST-API")
     parser.add_option("--verbose",
-        metavar="DEBUG", dest="verbose", 
+        metavar="DEBUG", dest="verbose",
         action="store_true", 
         help="Prints some debug stuff")
+    query_opts = optparse.OptionGroup(
+        parser, 'Query Options',)
+    query_opts.add_option("--host",
+        metavar="HOST", dest="host", 
+        default=False, action="store", 
+        help="Query REST-API for specific HOST")
+    parser.add_option_group(query_opts)
     (options, args) = parser.parse_args()
 
     # debug stuff   
@@ -39,31 +42,40 @@ def main():
         print 'PASSWORD  :', password
         print 'BASEURL   :', baseurl     
         print 'ARGV      :', sys.argv[1:] 
-        print 'FUNCTION  :', options.function
+        print 'FUNCTION  :', options.query
         print 'HOST      :', options.host
         print 'ARGS      :', args 
 
-    # ugly function switch
-    if options.function:
-        function = options.function
+    # ugly query switch
+    if options.query:
+        query = options.query
         # facts
-        if function == 'facts':
-            fact = sys.argv[3] 
-            url = "%s/facts/%s/values" % (baseurl, fact)
-            print("listing hosts with %s\n" % (fact))
+        if query == 'facts':
             if options.host:
                 host = options.host
                 url = "%s/hosts/%s/facts" % (baseurl, host)
-                print("listing facts for %s\n" % (host))
-        if function == 'os':
+                print("getting facts for %s\n" % (host))
+            else:
+                fact = sys.argv[3]
+                url = "%s/facts/%s/values" % (baseurl, fact)
+                print("getting hosts with %s\n" % (fact))
+        # reports
+        if query == 'reports':
+            if options.host:
+                host = options.host
+                url = "%s/hosts/%s/reports/last" % (baseurl, host)
+                print("getting latest report for %s\n" % (host))
+            else:
+                url = "%s/reports/last" % (baseurl)
+                print("no specific host specified, getting latest")
+        # operatingsystems
+        if query == 'os':
             url = "%s/operatingsystems" % (baseurl)
-            print ("listing operatingsystems")
-        if function == 'status':
-            url = "%s/%s" % (baseurl, function)
-            print("getting status")
-        if function == 'dashboard':
-            url = "%s/%s" % (baseurl, function)
-            print("getting dashboard")
+            print("listing operatingsystems")
+        # hostgroup, hosts, status, dashboard
+        if query == 'hostgroup' or query == 'hosts' or query == 'status' or query == 'dashboard':
+            url = "%s/%s" % (baseurl, query)
+            print("getting %s" % (query))
     else:
         sys.exit(0)
    
