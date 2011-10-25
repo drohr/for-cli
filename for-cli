@@ -19,32 +19,25 @@ def main():
 
     # optparse values
     parser = optparse.OptionParser(usage="%prog -q arg [query options]", version="%prog 0.7")
-    parser.add_option("-q",
-        metavar="QUERY", dest="query", 
-        default=False, action="store", 
-        help="Query REST-API")
-    parser.add_option("--verbose",
+    parser.add_option("-q", 
+        metavar="QUERY", dest="query", default=False, 
+        action="store", help="query REST-API")
+    parser.add_option("--verbose", 
         metavar="DEBUG", dest="verbose",
-        action="store_true", 
-        help="Prints some debug stuff")
-    query_opts = optparse.OptionGroup(
-        parser, 'Query Options',)
+         action="store_true",  help="prints some debug stuff")
+    query_opts = optparse.OptionGroup(parser, 'Query Options',)
     query_opts.add_option("--host",
-        metavar="HOST", dest="host", 
-        default=False, action="store", 
-        help="query with specific HOST")
+        metavar="HOST", dest="host", default=False, 
+        action="store", help="query with specific HOST")
     query_opts.add_option("--username",
-        metavar="USERNAME", dest="username",
-        default=False, action="store",
-        help="query with specific USERNAME")
+        metavar="USERNAME", dest="username", default=False, 
+        action="store", help="query with specific USERNAME")
     query_opts.add_option("--password",
-        metavar="PASSWORD", dest="password",
-        default=False, action="store",
-        help="query with specific PASSWORD")
-    query_opts.add_option("--baseurl",
-         metavar="BASEURL", dest="baseurl",
-         default=False, action="store",
-         help="query with specific BASEURL")
+        metavar="PASSWORD", dest="password", default=False, 
+        action="store", help="query with specific PASSWORD")
+    query_opts.add_option("--baseurl", 
+        metavar="BASEURL", dest="baseurl", default=False, 
+        action="store", help="query with specific BASEURL")
     parser.add_option_group(query_opts)
     (options, args) = parser.parse_args()
 
