@@ -7,9 +7,9 @@ import optparse
 def main():
 
     # basic settings
-    username = 'foreman' # or use sys.argv[2]
-    password = 'foreman' # or use sys.argv[3]
-    baseurl = 'http://foreman.example.com'
+    username = 'foreman' # or use --username=
+    password = 'foreman' # or use --password=
+    baseurl = 'http://foreman.example.com' # or use --baseurl=
 
     # if no input, show some love
     usage = "usage: %prog -q arg [query options]"
@@ -32,9 +32,29 @@ def main():
     query_opts.add_option("--host",
         metavar="HOST", dest="host", 
         default=False, action="store", 
-        help="Query REST-API for specific HOST")
+        help="query with specific HOST")
+    query_opts.add_option("--username",
+        metavar="USERNAME", dest="username",
+        default=False, action="store",
+        help="query with specific USERNAME")
+    query_opts.add_option("--password",
+        metavar="PASSWORD", dest="password",
+        default=False, action="store",
+        help="query with specific PASSWORD")
+    query_opts.add_option("--baseurl",
+         metavar="BASEURL", dest="baseurl",
+         default=False, action="store",
+         help="query with specific BASEURL")
     parser.add_option_group(query_opts)
     (options, args) = parser.parse_args()
+
+    # set query options
+    if options.username:
+        username = options.username
+    if options.password:
+        password = options.password
+    if options.baseurl:
+        baseurl = options.baseurl
 
     # debug stuff   
     if options.verbose:
@@ -80,7 +100,6 @@ def main():
             print("Bad query, probably not implemented yet")
             sys.exit(0)
     else:
-        print("Bad syntax, check -h for help")
         sys.exit(0)
    
     # send request with urllib2
