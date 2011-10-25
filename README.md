@@ -1,5 +1,9 @@
 ## Python CLI for Foremans REST-API
 
+Simple python CLI to interact with foremans REST-API.
+
+Make sure to change the default username/password and baseurl for your foreman installation
+
 ### Query for facts
 
 #### Get all hosts and values for a specific fact (kernelversion)
