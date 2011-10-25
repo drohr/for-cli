@@ -18,7 +18,7 @@ def main():
         sys.exit(1)
 
     # optparse values
-    parser = optparse.OptionParser(usage="%prog -q arg [query options]", version="%prog 0.6")
+    parser = optparse.OptionParser(usage="%prog -q arg [query options]", version="%prog 0.7")
     parser.add_option("-q",
         metavar="QUERY", dest="query", 
         default=False, action="store", 
@@ -60,7 +60,7 @@ def main():
                 url = "%s/facts/%s/values" % (baseurl, fact)
                 print("getting hosts with %s\n" % (fact))
         # reports
-        if query == 'reports':
+        elif query == 'reports':
             if options.host:
                 host = options.host
                 url = "%s/hosts/%s/reports/last" % (baseurl, host)
@@ -69,14 +69,18 @@ def main():
                 url = "%s/reports/last" % (baseurl)
                 print("no specific host specified, getting latest")
         # operatingsystems
-        if query == 'os':
+        elif query == 'os':
             url = "%s/operatingsystems" % (baseurl)
             print("listing operatingsystems")
         # hostgroup, hosts, status, dashboard
-        if query == 'hostgroup' or query == 'hosts' or query == 'status' or query == 'dashboard':
+        elif query == 'hostgroup' or query == 'hosts' or query == 'status' or query == 'dashboard':
             url = "%s/%s" % (baseurl, query)
             print("getting %s" % (query))
+        else:
+            print("Bad query, probably not implemented yet")
+            sys.exit(0)
     else:
+        print("Bad syntax, check -h for help")
         sys.exit(0)
    
     # send request with urllib2
