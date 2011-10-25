@@ -24,7 +24,7 @@ def main():
         action="store", help="query REST-API")
     parser.add_option("--verbose", 
         metavar="DEBUG", dest="verbose",
-         action="store_true",  help="prints some debug stuff")
+        action="store_true",  help="prints some debug stuff")
     query_opts = optparse.OptionGroup(parser, 'Query Options',)
     query_opts.add_option("--host",
         metavar="HOST", dest="host", default=False, 
@@ -85,8 +85,8 @@ def main():
         elif query == 'os':
             url = "%s/operatingsystems" % (baseurl)
             print("listing operatingsystems")
-        # hostgroup, hosts, status, dashboard
-        elif query == 'hostgroup' or query == 'hosts' or query == 'status' or query == 'dashboard':
+        # hostgroups, hosts, status, dashboard
+        elif query == 'hostgroups' or query == 'hosts' or query == 'status' or query == 'dashboard':
             url = "%s/%s" % (baseurl, query)
             print("getting %s" % (query))
         else:
