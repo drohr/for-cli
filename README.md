@@ -24,6 +24,16 @@ Make sure to change the default username/password and baseurl for your foreman i
 
     for-cli -q dashboard
 
+### Query for reports
+
+#### Retrieve the last report
+
+    for-cli -q reports
+
+#### Retrieve the latest report for a specific host (FQDN)
+
+    for-cli -q reports --host=host.example.com
+
 ### Get full lists
 
 #### Retrieve a list of Operatingsystems
