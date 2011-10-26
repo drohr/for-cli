@@ -20,7 +20,8 @@ def main():
     # optparse values
     parser = optparse.OptionParser(usage="%prog -q arg [query options]", version="%prog 0.7")
     parser.add_option("-q", 
-        metavar="QUERY", dest="query", default=False, 
+        metavar="QUERY", dest="query", default=False,
+        choices=['facts', 'reports', 'os', 'hosts', 'hostgroups', 'status', 'dashboard',], 
         action="store", help="query REST-API")
     parser.add_option("--verbose", 
         metavar="DEBUG", dest="verbose",
@@ -64,20 +65,29 @@ def main():
         query = options.query
         # facts
         if query == 'facts':
+            # if host is set, get facts for host
             if options.host:
                 host = options.host
                 url = "%s/hosts/%s/facts" % (baseurl, host)
                 print("getting facts for %s\n" % (host))
             else:
-                fact = sys.argv[3]
-                url = "%s/facts/%s/values" % (baseurl, fact)
-                print("getting hosts with %s\n" % (fact))
+                # if specific fact is called, get all values for that fact
+                if len(sys.argv) > 3:
+                    fact = sys.argv[3]
+                    url = "%s/facts/%s/values" % (baseurl, fact)
+                    print("getting hosts with %s\n" % (fact))
+                # if no argument is sent, list all facts
+                else:
+                    url = "%s/facts" % (baseurl)
+                    print("listing all facts")
         # reports
         elif query == 'reports':
+            # if host is set, get latest report for host
             if options.host:
                 host = options.host
                 url = "%s/hosts/%s/reports/last" % (baseurl, host)
                 print("getting latest report for %s\n" % (host))
+            # if no specific host is set, list latest report
             else:
                 url = "%s/reports/last" % (baseurl)
                 print("no specific host specified, getting latest")

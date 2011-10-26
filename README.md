@@ -37,6 +37,10 @@ or use the --username/password/baseurl flags.
 
 ### Get full lists
 
+#### Retrieve a list of Facts
+
+    for-cli -q facts
+
 #### Retrieve a list of Operatingsystems
 
     for-cli -q os
