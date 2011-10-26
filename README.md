@@ -1,6 +1,6 @@
 ## for-cli
 
-Simple python CLI to interact with the REST-API for foreman. http://theforeman.org/
+Simple python CLI to interact with the REST API for foreman. http://theforeman.org/
 
 Make sure to change the default username/password and baseurl for your foreman installation
 or use the --username/password/baseurl flags.
@@ -27,7 +27,7 @@ or use the --username/password/baseurl flags.
 
 ### Query for reports
 
-#### Retrieve the last report
+#### Retrieve the lastest report
 
     for-cli -q reports
 

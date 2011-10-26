@@ -12,7 +12,6 @@ def main():
     baseurl = 'http://foreman.example.com' # or use --baseurl=
 
     # if no input, show some love
-    usage = "usage: %prog -q arg [query options]"
     if len(sys.argv) < 2:
         sys.stderr.write('Usage: for-cli -h\n')
         sys.exit(1)
@@ -22,7 +21,7 @@ def main():
     parser.add_option("-q", 
         metavar="QUERY", dest="query", default=False,
         choices=['facts', 'reports', 'os', 'hosts', 'hostgroups', 'status', 'dashboard',], 
-        action="store", help="query REST-API")
+        action="store", help="query REST API")
     parser.add_option("--verbose", 
         metavar="DEBUG", dest="verbose",
         action="store_true",  help="prints some debug stuff")
