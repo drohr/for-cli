@@ -6,10 +6,21 @@ import optparse
 
 def main():
 
-    # basic settings
+    #################################################################
+
+    # foreman settings
     username = 'foreman' # or use --username=
     password = 'foreman' # or use --password=
-    baseurl = 'http://foreman.example.com' # or use --baseurl=
+    baseurl = 'http://foreman.example.com' # or use --url=
+    baseport = '3000' # or use --port=
+
+    # foreman-proxy settings
+    proxyusername = 'foreman' # or use --username=
+    proxypassword = 'foreman' # or use --password=
+    proxyurl = 'http://foreman-proxy.example.com' # or use --url=
+    proxyport = '8443' # or use --port=
+
+    #################################################################
 
     # if no input, show some love
     if len(sys.argv) < 2:
@@ -17,11 +28,11 @@ def main():
         sys.exit(1)
 
     # optparse values
-    parser = optparse.OptionParser(usage="%prog -q arg [query options]", version="%prog 0.7")
+    parser = optparse.OptionParser(usage="%prog -q arg [query options]", version="%prog 0.8a")
     parser.add_option("-q", 
         metavar="QUERY", dest="query", default=False,
-        choices=['facts', 'reports', 'os', 'hosts', 'hostgroups', 'status', 'dashboard',], 
-        action="store", help="query REST API")
+        choices=['facts', 'reports', 'os', 'hosts', 'ca', 'hostgroups', 'status', 'dashboard',], 
+        action="store", help="query REST API of foreman or smart-proxy")
     parser.add_option("--verbose", 
         metavar="DEBUG", dest="verbose",
         action="store_true",  help="prints some debug stuff")
@@ -35,9 +46,12 @@ def main():
     query_opts.add_option("--password",
         metavar="PASSWORD", dest="password", default=False, 
         action="store", help="query with specific PASSWORD")
-    query_opts.add_option("--baseurl", 
-        metavar="BASEURL", dest="baseurl", default=False, 
-        action="store", help="query with specific BASEURL")
+    query_opts.add_option("--url", 
+        metavar="URL", dest="baseurl", default=False, 
+        action="store", help="query with specific URL to foreman/proxy")
+    query_opts.add_option("--port",
+        metavar="PORT", dest="baseport", default=False,
+        action="store", help="query with specific PORT to foreman/proxy")
     parser.add_option_group(query_opts)
     (options, args) = parser.parse_args()
 
@@ -47,13 +61,20 @@ def main():
     if options.password:
         password = options.password
     if options.baseurl:
-        baseurl = options.baseurl
+         baseurl = options.baseurl
+         proxyurl = options.baseurl
+    if options.baseport:
+         baseport = options.baseport
+         proxyport = options.baseport
 
     # debug stuff   
     if options.verbose:
         print 'USERNAME  :', username
         print 'PASSWORD  :', password
-        print 'BASEURL   :', baseurl     
+        print 'BASEURL   :', baseurl  
+        print 'PROXYURL  :', proxyurl
+        print 'PORT      :', baseport
+        print 'PROXYPORT :', proxyport   
         print 'ARGV      :', sys.argv[1:] 
         print 'FUNCTION  :', options.query
         print 'HOST      :', options.host
@@ -67,37 +88,40 @@ def main():
             # if host is set, get facts for host
             if options.host:
                 host = options.host
-                url = "%s/hosts/%s/facts" % (baseurl, host)
+                url = "%s:%s/hosts/%s/facts" % (baseurl, baseport, host)
                 print("getting facts for %s\n" % (host))
             else:
                 # if specific fact is called, get all values for that fact
                 if len(sys.argv) > 3:
                     fact = sys.argv[3]
-                    url = "%s/facts/%s/values" % (baseurl, fact)
+                    url = "%s:%s/facts/%s/values" % (baseurl, baseport, fact)
                     print("getting hosts with %s\n" % (fact))
                 # if no argument is sent, list all facts
                 else:
-                    url = "%s/facts" % (baseurl)
+                    url = "%s:%s/facts" % (baseurl, baseport)
                     print("listing all facts")
         # reports
         elif query == 'reports':
             # if host is set, get latest report for host
             if options.host:
                 host = options.host
-                url = "%s/hosts/%s/reports/last" % (baseurl, host)
+                url = "%s:%s/hosts/%s/reports/last" % (baseurl, baseport, host)
                 print("getting latest report for %s\n" % (host))
             # if no specific host is set, list latest report
             else:
-                url = "%s/reports/last" % (baseurl)
+                url = "%s:%s/reports/last" % (baseurl, baseport)
                 print("no specific host specified, getting latest")
         # operatingsystems
         elif query == 'os':
-            url = "%s/operatingsystems" % (baseurl)
+            url = "%s:%s/operatingsystems" % (baseurl, baseport)
             print("listing operatingsystems")
         # hostgroups, hosts, status, dashboard
         elif query == 'hostgroups' or query == 'hosts' or query == 'status' or query == 'dashboard':
-            url = "%s/%s" % (baseurl, query)
+            url = "%s:%s/%s" % (baseurl, baseport, query)
             print("getting %s" % (query))
+        elif query == 'ca':
+            url = "%s:%s/puppet/ca" % (proxyurl, proxyport)
+            print("list of all puppet certificates")
         else:
             print("Bad query, probably not implemented yet")
             sys.exit(0)

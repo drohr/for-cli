@@ -1,9 +1,9 @@
 ## for-cli
 
-Simple python CLI to interact with the REST API for foreman. http://theforeman.org/
+Simple python CLI to interact with the REST API for foreman or the smart-proxy. http://theforeman.org/
 
 Make sure to change the default username/password and baseurl for your foreman installation
-or use the --username/password/baseurl flags.
+or use the --username/password/url/port flags.
 
 ### Query for facts
 
@@ -52,3 +52,7 @@ or use the --username/password/baseurl flags.
 #### Retrieve a list of Hostsgroups
 
     for-cli -q hostgroups
+
+#### Retrieve a list of all puppet certificates 
+
+    for-cli -q ca
