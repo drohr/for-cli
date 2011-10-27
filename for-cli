@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # foreman cli <david@rohr.se>
 
-import urllib2, base64, json, sys
+import urllib, urllib2, base64, json, sys
 import optparse
 
 def main():
@@ -31,7 +31,7 @@ def main():
     parser = optparse.OptionParser(usage="%prog -q arg [query options]", version="%prog 0.8a")
     parser.add_option("-q", 
         metavar="QUERY", dest="query", default=False,
-        choices=['facts', 'reports', 'os', 'hosts', 'ca', 'hostgroups', 'status', 'dashboard',], 
+        choices=['facts', 'reports', 'run', 'os', 'hosts', 'ca', 'hostgroups', 'status', 'dashboard',], 
         action="store", help="query REST API of foreman or smart-proxy")
     parser.add_option("--verbose", 
         metavar="DEBUG", dest="verbose",
@@ -90,16 +90,19 @@ def main():
                 host = options.host
                 url = "%s:%s/hosts/%s/facts" % (baseurl, baseport, host)
                 print("getting facts for %s\n" % (host))
+                get_data( url, username, password )
             else:
                 # if specific fact is called, get all values for that fact
                 if len(sys.argv) > 3:
                     fact = sys.argv[3]
                     url = "%s:%s/facts/%s/values" % (baseurl, baseport, fact)
                     print("getting hosts with %s\n" % (fact))
+                    get_data( url, username, password )
                 # if no argument is sent, list all facts
                 else:
                     url = "%s:%s/facts" % (baseurl, baseport)
                     print("listing all facts")
+                    get_data( url, username, password )
         # reports
         elif query == 'reports':
             # if host is set, get latest report for host
@@ -107,27 +110,49 @@ def main():
                 host = options.host
                 url = "%s:%s/hosts/%s/reports/last" % (baseurl, baseport, host)
                 print("getting latest report for %s\n" % (host))
+                get_data( url, username, password )
             # if no specific host is set, list latest report
             else:
                 url = "%s:%s/reports/last" % (baseurl, baseport)
                 print("no specific host specified, getting latest")
+                get_data( url, username, password )
         # operatingsystems
         elif query == 'os':
             url = "%s:%s/operatingsystems" % (baseurl, baseport)
             print("listing operatingsystems")
+            get_data( url, username, password )
         # hostgroups, hosts, status, dashboard
         elif query == 'hostgroups' or query == 'hosts' or query == 'status' or query == 'dashboard':
             url = "%s:%s/%s" % (baseurl, baseport, query)
             print("getting %s" % (query))
+            get_data( url, username, password )
+        # ca certificates (smart-proxy)
         elif query == 'ca':
             url = "%s:%s/puppet/ca" % (proxyurl, proxyport)
             print("list of all puppet certificates")
+            get_data( url, username, password )
+        # puppetrun
+        elif query == 'run' or query == 'puppetrun':
+            if options.host:
+                host = options.host
+                url = "%s:%s/puppet/run" % (proxyurl, proxyport)
+                # pretty? don't think so. 
+                data = {'nodes':'foo'}
+                data['nodes'] = host 
+                postdata = urllib.urlencode(data)
+                print("Trigger puppet run / kick on %s" % (host))
+                post_data( url, username, password, postdata )
+            else:
+                print("Please specify --host= when using run")
+                sys.exit(0)
         else:
             print("Bad query, probably not implemented yet")
             sys.exit(0)
     else:
         sys.exit(0)
-   
+
+# GET 
+def get_data(url, username, password): 
     # send request with urllib2
     request = urllib2.Request(url)
     base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
@@ -138,6 +163,16 @@ def main():
     htmlData = json.load(htmlFile)
     print json.dumps(htmlData, sort_keys=True, indent=1)
     htmlFile.close()
+
+# POST
+def post_data(url, username, password, postdata):
+    # send request with urllib2
+    request = urllib2.Request(url)
+    base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
+    request.add_header("Authorization", "Basic %s" % base64string)
+    request.add_data(postdata)
+    response = urllib2.urlopen(request)
+    response.close()
 
 if __name__ == '__main__':
     main()

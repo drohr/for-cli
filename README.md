@@ -56,3 +56,9 @@ or use the --username/password/url/port flags.
 #### Retrieve a list of all puppet certificates 
 
     for-cli -q ca
+
+### Post requests
+
+#### Trigger puppet run / kick on a specific host (FQDN)
+
+    for-cli -q run --host=host.example.com	
