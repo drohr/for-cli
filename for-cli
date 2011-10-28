@@ -12,13 +12,13 @@ def main():
     username = 'foreman' # or use --username=
     password = 'foreman' # or use --password=
     baseurl = 'http://foreman.example.com' # or use --url=
-    baseport = '3000' # or use --port=
+    baseport = '80' # or use --port=
 
     # foreman-proxy settings
     proxyusername = 'foreman' # or use --username=
     proxypassword = 'foreman' # or use --password=
-    proxyurl = 'http://foreman-proxy.example.com' # or use --url=
-    proxyport = '8443' # or use --port=
+    proxyurl = 'http://smart-proxy.example.com' # or use --url=
+    proxyport = '80' # or use --port=
 
     #################################################################
 
@@ -51,15 +51,17 @@ def main():
     query_opts = optparse.OptionGroup(parser, 'Query Options',)
     query_opts.add_option("--host",
         metavar="HOST", dest="host", default=False, 
-        action="store", help="query with specific host")
+        action="store", help="query with specific HOST")
     parser.add_option_group(query_opts)
     (options, args) = parser.parse_args()
 
     # set query options
     if options.username:
         username = options.username
+        proxyusername = options.username
     if options.password:
         password = options.password
+        proxypassword = options.password
     if options.baseurl:
          baseurl = options.baseurl
          proxyurl = options.baseurl
@@ -89,19 +91,19 @@ def main():
             if options.host:
                 host = options.host
                 url = "%s:%s/hosts/%s/facts" % (baseurl, baseport, host)
-                print("getting facts for %s\n" % (host))
+                print("retrieving facts for host: %s\n" % (host))
                 get_data( url, username, password )
             else:
                 # if specific fact is called, get all values for that fact
                 if len(args) > 0:
                     fact = args[0]
                     url = "%s:%s/facts/%s/values" % (baseurl, baseport, fact)
-                    print("getting hosts with %s\n" % (fact))
+                    print("retrieving hosts with fact: %s\n" % (fact))
                     get_data( url, username, password )
                 # if no argument is sent, list all facts
                 else:
                     url = "%s:%s/facts" % (baseurl, baseport)
-                    print("listing all facts")
+                    print("retrieving all facts")
                     get_data( url, username, password )
         # reports
         elif query == 'reports':
@@ -109,12 +111,12 @@ def main():
             if options.host:
                 host = options.host
                 url = "%s:%s/hosts/%s/reports/last" % (baseurl, baseport, host)
-                print("getting latest report for %s\n" % (host))
+                print("retrieving latest report for host: %s\n" % (host))
                 get_data( url, username, password )
             # if no specific host is set, list latest report
             else:
                 url = "%s:%s/reports/last" % (baseurl, baseport)
-                print("no specific host specified, getting latest")
+                print("retrieving latest report")
                 get_data( url, username, password )
         # operatingsystems
         elif query == 'os':
@@ -124,23 +126,27 @@ def main():
         # hostgroups, hosts, status, dashboard
         elif query == 'hostgroups' or query == 'hosts' or query == 'status' or query == 'dashboard':
             url = "%s:%s/%s" % (baseurl, baseport, query)
-            print("getting %s" % (query))
+            print("listing %s" % (query))
             get_data( url, username, password )
         # ca certificates (smart-proxy)
         elif query == 'ca':
+            username = proxyusername
+            password = proxypassword
             url = "%s:%s/puppet/ca" % (proxyurl, proxyport)
-            print("list of all puppet certificates")
+            print("retrieving all puppet certificates")
             get_data( url, username, password )
         # puppetrun
         elif query == 'run' or query == 'puppetrun':
             if options.host:
                 host = options.host
+                username = proxyusername
+                password = proxypassword
                 url = "%s:%s/puppet/run" % (proxyurl, proxyport)
-                # pretty? don't think so. 
-                data = {'nodes':'foo'}
+                # pretty? don't think so. {'nodes':'host'}
+                data = {}
                 data['nodes'] = host 
                 postdata = urllib.urlencode(data)
-                print("Trigger puppet run / kick on %s" % (host))
+                print("trigger puppet run / kick on host: %s" % (host))
                 post_data( url, username, password, postdata )
             else:
                 print("Please specify --host= when using run")
@@ -158,11 +164,21 @@ def get_data(url, username, password):
     base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
     request.add_header("Authorization", "Basic %s" % base64string)
     request.add_header("Content-Type", "application/json")
-    htmlFile = urllib2.urlopen(request)
-    # parse it with json
-    htmlData = json.load(htmlFile)
-    print json.dumps(htmlData, sort_keys=True, indent=1)
-    htmlFile.close()
+    try: 
+        response = urllib2.urlopen(request)
+    # easier to read then an exception?
+    except urllib2.URLError, e:
+        if hasattr(e, 'reason'):
+            print("Failed to reach a server.")
+            print("Reason: %s" % (e.reason))
+        elif hasattr(e, 'code'):
+            print("The server couldn\'t fulfill the request.")
+            print("Error code: %s" % (e.code))
+    else:
+        # parse it with json
+        responseData = json.load(response)
+        print json.dumps(responseData, sort_keys=True, indent=1)
+        response.close()
 
 # POST
 def post_data(url, username, password, postdata):
@@ -171,8 +187,18 @@ def post_data(url, username, password, postdata):
     base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
     request.add_header("Authorization", "Basic %s" % base64string)
     request.add_data(postdata)
-    response = urllib2.urlopen(request)
-    response.close()
+    try:
+        response = urllib2.urlopen(request)
+    # easier to read then an exception?
+    except urllib2.URLError, e:
+        if hasattr(e, 'reason'):
+            print("Failed to reach a server.")
+            print("Reason: %s" % (e.reason))
+        elif hasattr(e, 'code'):
+            print("The server couldn\'t fulfill the request.")
+            print("Error code: %s" % (e.code))
+    else:
+        response.close()
 
 if __name__ == '__main__':
     main()

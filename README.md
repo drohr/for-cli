@@ -1,6 +1,7 @@
 ## for-cli
 
-Simple python CLI to interact with the REST API for foreman or the smart-proxy. http://theforeman.org/
+Simple CLI to interact with the REST API for foreman or the smart-proxy. http://theforeman.org/
+Written in Python.
 
 Make sure to change the default username/password and baseurl for your foreman installation
 or use the --username/password/url/port flags.
