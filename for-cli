@@ -28,7 +28,7 @@ def main():
         sys.exit(1)
 
     # optparse values
-    parser = optparse.OptionParser(usage="%prog [options] arg [query options]", version="%prog 0.8a")
+    parser = optparse.OptionParser(usage="%prog [options] arg [query options]", version="%prog 1.0")
     parser.add_option("-q", 
         metavar="QUERY", dest="query", default=False,
         choices=['facts', 'reports', 'run', 'puppetrun', 'os', 'hosts', 'ca', 'hostgroups', 'status', 'dashboard',], 
@@ -184,6 +184,7 @@ def get_data(url, username, password):
 def post_data(url, username, password, postdata):
     # send request with urllib2
     request = urllib2.Request(url)
+    # encode with base64
     base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
     request.add_header("Authorization", "Basic %s" % base64string)
     request.add_data(postdata)
